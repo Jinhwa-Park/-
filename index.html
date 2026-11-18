@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>레시피 가격 측정기 · 도와줘요 셰프님!</title>
+<style>
+:root{color-scheme:light;--ink:#302b23;--paper:#fffdf6;--green:#294f3b;--line:#cfcbbb}
+*{box-sizing:border-box}body{margin:0;background:#f3f0e5;color:var(--ink);font-family:"Atkinson Hyperlegible Next","Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.55}
+header{max-width:650px;margin:24px auto 0;padding:0 20px;color:var(--green);font-weight:750}
+main{max-width:610px;margin:18px auto 64px;padding:clamp(20px,5vw,42px);background:var(--paper);border:1px solid var(--line);border-radius:14px}
+h1,h2,p{margin:0}h1{font-size:clamp(27px,5vw,38px);letter-spacing:-.06em;line-height:1.2}h2{font-size:20px}.intro{margin:12px 0 23px;color:#5b594e}
+form{display:grid;gap:16px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}label{display:grid;gap:6px;font-weight:650}input,select,button{font:inherit;border-radius:7px}input,select{width:100%;min-height:44px;background:white;border:1px solid #a8a796;color:var(--ink);padding:8px 11px}
+details{border-block:1px solid var(--line);padding:12px 0}summary{cursor:pointer;font-weight:650}details .row{margin-top:14px}details label{margin-bottom:8px}button{width:100%;min-height:48px;border:0;font-weight:700;background:var(--green);color:#fff;cursor:pointer}button:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:3px solid #b35324;outline-offset:3px}[hidden]{display:none!important}#result{border-top:1px solid var(--line);margin-top:24px;padding-top:20px}#amount{font-size:34px;letter-spacing:-.05em;display:block}#description{margin:5px 0 14px;color:#545345}#notice{color:#943a15;margin-top:12px}#thanks{color:var(--green);font-weight:bold}small{color:#626153}
+@media(max-width:650px){main{margin:14px 12px 28px}header{margin-top:18px}}@media(max-width:390px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>도와줘요 셰프님!</header>
+<main>
+<h1>레시피 가격 측정기</h1>
+<p class="intro">원하는 요리와 인분을 입력하면 주문 전체의 예상 가격을 확인할 수 있어요.</p>
+<form id="form">
+<label>원하는 요리<input id="menu" name="menu" placeholder="예: 새우볶음밥" maxlength="200" required></label>
+<div class="row">
+<label>인분 수<input id="servings" type="number" min="1" max="100" step="1" value="3" required></label>
+<label>소분 용기 수<input id="containers" type="number" min="0" max="100" step="1" value="0" required></label>
+</div>
+<details><summary>재료 추가 요청</summary>
+<div class="row"><label>추가 재료<input id="extra" maxlength="100" placeholder="예: 새우"></label>
+<label>추가 중량(g)<input id="grams" type="number" step="any" min="0.01" max="100000" placeholder="예: 100"></label></div>
+<label>추가량 적용 범위<select id="scope"><option value="once">주문 전체에 한 번</option><option value="each">1인분마다</option></select></label>
+</details>
+<button id="submit" type="submit">예상 가격 확인하기</button>
+<small>실험용 견적입니다. 주문·결제는 발생하지 않으며 입력한 요리 조건과 버튼 클릭이 익명으로 기록됩니다.</small>
+</form>
+<section id="result" aria-live="polite" hidden>
+<h2 id="title"></h2><strong id="amount"></strong><p id="description"></p>
+<button type="button" id="proceed" hidden>이 가격으로 진행하기</button>
+<p id="thanks" hidden>참여해 주셔서 감사합니다. 선택을 기록했어요.</p>
+</section>
+<p id="notice" role="alert"></p>
+</main>
+<script>
+const get = (id) => document.getElementById(id);
+let current = null;
+let observer = null;
+let seenPending = false;
+let attempt = null;
+const money = new Intl.NumberFormat("ko-KR");
+async function post(path, body) {
+  const response = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "요청을 처리할 수 없습니다.");
+  return data;
+}
+function clearQuote() {
+  if (observer) observer.disconnect();
+  current = null;
+  seenPending = false;
+  get("result").hidden = true;
+  get("notice").textContent = "";
+}
+get("form").addEventListener("input", () => { attempt = null; clearQuote(); });
+async function recordSeen() {
+  if (!current || seenPending || current.seen || document.visibilityState !== "visible") return;
+  const box = get("amount").getBoundingClientRect();
+  if (box.bottom <= 0 || box.top >= innerHeight) return;
+  const viewed = current;
+  seenPending = true;
+  try {
+    await post("/api/event", {id:viewed.id, event:"seen"});
+    viewed.seen = true;
+  } catch {
+    // A later visibility change retries. A proceed click independently records exposure.
+  } finally { if (current === viewed) seenPending = false; }
+}
+document.addEventListener("visibilitychange", recordSeen);
+get("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearQuote();
+  const params = {
+    menu:get("menu").value.trim(), servings:get("servings").valueAsNumber, containers:get("containers").valueAsNumber,
+    extra:get("extra").value.trim() || null, extra_grams:get("grams").valueAsNumber || 0,
+    per_serving:get("scope").value === "each"
+  };
+  if (Boolean(params.extra) !== (params.extra_grams > 0)) {
+    get("notice").textContent = "추가 재료 이름과 중량을 함께 입력해 주세요.";
+    return;
+  }
+  const key = JSON.stringify(params);
+  if (!attempt || attempt.key !== key) attempt = {id:crypto.randomUUID(), key};
+  const submitted = attempt;
+  get("submit").disabled = true;
+  try {
+    const quote = await post("/api/quote", {id:submitted.id, ...params});
+    if (attempt !== submitted) return;
+    const ok = quote.status === "estimated";
+    get("title").textContent = ok ? params.menu + " " + params.servings + "인분" : "견적을 보류했어요";
+    get("amount").textContent = ok ? money.format(quote.total) + "원" : "";
+    get("description").textContent = ok ? "주문 전체 예상 금액 · 1인분 약 " + money.format(Math.round(quote.total / params.servings)) + "원" : quote.reason || "요리 조건을 확인해 주세요.";
+    if (ok && quote.method === "catalog") {
+      get("description").textContent += " · 강남 가격표 " + quote.stores + "개 매장 · " + quote.basis;
+    } else if (ok) {
+      get("description").textContent += " · 레시피 기준 추정";
+    }
+    get("proceed").hidden = !ok;
+    get("proceed").disabled = false;
+    get("thanks").hidden = true;
+    get("result").hidden = false;
+    if (ok) {
+      current = {id:submitted.id, seen:false};
+      observer = new IntersectionObserver(recordSeen);
+      observer.observe(get("amount"));
+    }
+    get("result").scrollIntoView({block:"nearest"});
+  } catch (err) { get("notice").textContent = err.message; }
+  finally { get("submit").disabled = false; }
+});
+get("proceed").addEventListener("click", async () => {
+  const selected = current;
+  if (!selected) return;
+  get("proceed").disabled = true;
+  try {
+    await post("/api/event", {id:selected.id, event:"proceed"});
+    if (current !== selected) return;
+    get("proceed").hidden = true;
+    get("thanks").hidden = false;
+    get("notice").textContent = "";
+  } catch (err) {
+    if (current !== selected) return;
+    get("notice").textContent = err.message;
+    get("proceed").disabled = false;
+  }
+});
+</script>
+</body>
+</html>

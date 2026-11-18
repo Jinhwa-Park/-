@@ -1,0 +1,35 @@
+{
+  "accessed_on": "2026-11-18",
+  "price_basis": "롯데마트 제타의 개별 상품 페이지에서 확인한 소매 표시가. 검색·수집 시점이 서로 다른 페이지의 기록이며, 실제 결제일·강남구 특정 점포의 가격은 미확인.",
+  "offers": {
+    "새우": {"product": "냉동 흰다리 새우살 중, 꼬리 없음", "unit": "g", "size": 500, "won": 25900, "url": "https://lottemartzetta.com/products/OS8935093104880/details"},
+    "쌀": {"product": "임금님표 이천쌀", "unit": "g", "size": 4000, "won": 27900, "url": "https://lottemartzetta.com/products/OS8804595000757/details"},
+    "달걀": {"product": "오늘계란 대란", "unit": "개", "size": 10, "won": 3990, "url": "https://lottemartzetta.com/products/OS8809032697408/details"},
+    "대파": {"product": "소용량 깐대파", "unit": "g", "size": 200, "won": 1990, "url": "https://lottemartzetta.com/products/OS8809597441249/details"},
+    "식용유": {"product": "백설 식용유", "unit": "mL", "size": 900, "won": 5180, "url": "https://lottemartzetta.com/products/OS8801007402291/details"},
+    "소금": {"product": "청정원 맛소금", "unit": "g", "size": 250, "won": 1440, "url": "https://lottemartzetta.com/products/OS8801052171043/details"},
+    "후추": {"product": "오뚜기 순후추", "unit": "g", "size": 50, "won": 5380, "url": "https://lottemartzetta.com/products/OS8801045450124/details"},
+    "간장": {"product": "샘표 진간장 금F-3", "unit": "mL", "size": 500, "won": 4430, "url": "https://lottemartzetta.com/products/OS8801005133036/details"},
+    "돼지앞다리살": {"product": "냉장 국내산 돼지 앞다리 찌개용", "unit": "g", "size": 300, "won": 5670, "url": "https://lottemartzetta.com/products/OS2700000095836/details"}
+  },
+  "registered_recipe": {
+    "name": "우리의식탁·LG 중식 새우볶음밥",
+    "url": "https://wtable.co.kr/recipes/JDixtYd7SyHPvVSzmRgnD6Gd",
+    "per_serving": {"쌀": 80, "달걀": 2, "대파": 30, "새우": 80},
+    "seasonings": {"식용유": 30, "소금": 0.6, "후추": 0.1},
+    "assumptions": "밥 200g을 마른쌀 80g(취반배수 2.5), 대파 반 대를 깐대파 30g, 식용유 2큰술을 30mL, 소금 두 꼬집을 0.6g, 후추 약간을 0.1g으로 환산했다. 새우와 깐대파는 추가 손질 손실 0%를 가정했다."
+  },
+  "inference": {
+    "name": "계란볶음밥에 새우를 추가",
+    "base_url": "https://omeokji.com/recipes/easy-egg-fried-rice",
+    "portion_url": "https://www.10000recipe.com/recipe/7013556",
+    "per_serving": {"쌀": 84, "달걀": 2, "대파": 30, "새우": 100},
+    "seasoning_samples": [
+      {"name": "오먹지 계란볶음밥", "url": "https://omeokji.com/recipes/easy-egg-fried-rice", "recipe_servings": 1, "quantities": {"식용유": 15, "간장": 5, "소금": 0.3, "후추": 0.1}},
+      {"name": "만개의레시피 3분볶음밥", "url": "https://www.10000recipe.com/recipe/6853445", "recipe_servings": 2, "quantities": {"식용유": 30, "간장": 7.5, "소금": 0.3, "후추": 0.1}}
+    ],
+    "assumptions": "계란볶음밥의 밥 210g(생쌀 84g 가정), 달걀 2개, 대파 30g을 가져왔다. 교체할 고기는 없다. 칠리새우덮밥 1인분의 새우 100g을 볶음밥 토핑량으로 옮긴 추정이다. 양념은 두 계란볶음밥 레시피의 원 재료량을 인분으로 나누어 가격을 붙인 뒤 중앙값을 구한다. 식용유 1큰술=15mL, 간장 1작은술=5mL, 원 레시피의 소금·후추 약간은 레시피 전체 0.3g·0.1g으로 가정하며 소금 단가로 맛소금을 대입한다."
+  },
+  "policy": {"hourly_won": 16000, "markup": 0.30, "container_won": 300, "fixed_minutes": 12, "minutes_per_batch": 8, "servings_per_batch": 2, "minutes_per_container": 1},
+  "labor_basis": "실험 가정. 준비·정리 12분, 2인분까지 한 팬에 8분, 소분 1개에 1분. 시급 16,000원, 재료비 가산율 30%, 용기값 300원/개. 위 직접 작업시간은 미실측이며 원 레시피에 적힌 조리 소요시간 20분과 구분한다. 추가 새우의 별도 손질 시간은 0분으로 놓았다."
+}
