@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from pricing import quote
+from lookup import render
 
 
 ROOT = Path(__file__).resolve().parent
@@ -127,7 +128,7 @@ def main():
         db.executescript(DDL)
     with ThreadingHTTPServer(("127.0.0.1", args.port), Handler) as server:
         server.catalog, server.database = catalog, args.db
-        server.index = (ROOT / "index.html").read_bytes()
+        server.index = render(catalog).encode("utf-8")
         print(f"레시피 가격 측정기  http://127.0.0.1:{server.server_port}", flush=True)
         if args.open:
             webbrowser.open(f"http://127.0.0.1:{server.server_port}")
