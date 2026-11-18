@@ -6,7 +6,7 @@
 *{box-sizing:border-box}body{margin:0;background:#f8f6ee;color:#302b25;font:16px/1.6 "Apple SD Gothic Neo","Malgun Gothic",sans-serif}main{max-width:560px;margin:8vh auto;padding:28px}header{color:#49654d;font-weight:bold}h1{font-size:32px;margin:12px 0 26px;letter-spacing:-.06em}label{display:block;font-weight:bold}input,button{font:inherit;border-radius:8px;padding:12px 14px}input{width:100%;border:1px solid #9b9e91;margin:6px 0 12px}button{background:#32573c;color:white;border:0;cursor:pointer;width:100%}output{display:block;margin-top:24px}output:not(:empty){border-top:1px solid #d4d2c3;padding-top:16px}strong{display:block;font-size:30px}
 </style>
 <main><header>도와줘요 셰프님!</header><h1>메뉴 가격 조회</h1>
-<form><label for="menu">메뉴명</label><input id="menu" placeholder="예: 새우볶음밥" list="menus" required><datalist id="menus"></datalist><button>기준 가격 조회</button></form>
+<form><label for="menu">메뉴명</label><input id="menu" placeholder="예: 새우볶음밥" list="menus" required><datalist id="menus"></datalist><button>가격 조회</button></form>
 <output aria-live="polite"></output></main>
 <script>
 const prices = /*PRICE_TABLE*/{};
@@ -26,9 +26,30 @@ document.querySelector("form").addEventListener("submit", event => {
     result.textContent = "기준표에 등록된 메뉴를 찾지 못했습니다.";
     return;
   }
-  const amount = document.createElement("strong");
-  amount.textContent = prices[name].toLocaleString("ko-KR") + "원";
-  result.replaceChildren(name + " · 기준 가격", amount);
+  const entry = prices[name];
+  result.textContent = name;
+  if (entry.price !== undefined) {
+    const amount = document.createElement("strong");
+    amount.textContent = entry.price.toLocaleString("ko-KR") + "원";
+    const basis = document.createElement("div");
+    basis.textContent = "기준 가격 · " + entry.basis;
+    result.append(amount, basis);
+  } else {
+    const status = document.createElement("p");
+    status.textContent = "1인분 기준가 미확정";
+    result.append(status);
+  }
+  if (entry.observations?.length) {
+    const heading = document.createElement("h2");
+    heading.textContent = "매장별 게시 가격";
+    const list = document.createElement("ul");
+    for (const [price, units, store] of entry.observations) {
+      const row = document.createElement("li");
+      row.textContent = [price.toLocaleString("ko-KR") + "원", units, store].filter(Boolean).join(" · ");
+      list.append(row);
+    }
+    result.append(heading, list);
+  }
 });
 </script>
 </html>

@@ -4,10 +4,10 @@
 
 ## 현재 첫 화면 · 메뉴 가격 조회
 
-메뉴명 하나를 제출하면 카탈로그에 저장된 unit_price를 그대로 표시한다. 예를 들어 새우볶음밥이 11,500원으로 등록되어 있으면 결과는 11,500원이다. 띄어쓰기는 무시하며 미등록 메뉴는 조회 실패로 표시한다. 아래 명령으로 만든 HTML은 파일을 더블클릭하면 서버 없이 작동한다. 완성 HTML에는 가격 목록이 포함되므로 내부용으로 보관한다.
+메뉴명 하나를 제출하면 카탈로그에 저장된 unit_price를 그대로 표시한다. 예를 들어 새우볶음밥이 11,500원으로 등록되어 있으면 결과는 11,500원이다. 기준가에는 인분 근거를 표시한다. 원본 엑셀을 함께 지정하면 일치하는 메뉴의 매장별 게시 가격과 인분·판매 규격이 함께 나오며, 기준가가 없는 메뉴도 게시 가격을 조회할 수 있다. 띄어쓰기는 무시한다. 아래 명령으로 만든 HTML은 파일을 더블클릭하면 서버 없이 작동한다. 완성 HTML에는 가격 목록이 포함되므로 내부용으로 보관한다.
 
 ```sh
-python3 lookup.py catalog.json menu-price-lookup.html
+python3 lookup.py catalog.json menu-price-lookup.html --workbook gangnam_menu_types.xlsx
 ```
 
 ## 로컬 서버로 같은 화면 실행
@@ -18,7 +18,7 @@ python3 lookup.py catalog.json menu-price-lookup.html
 python3 server.py --catalog catalog.json
 ```
 
-브라우저에서 http://127.0.0.1:8000 을 연다. Windows에서는 python3 대신 py를 사용할 수 있다. GitHub에서 코드만 받은 경우 다음 명령으로 첨부 가격표에서 catalog.json을 먼저 생성한다.
+브라우저에서 http://127.0.0.1:8000 을 연다. 게시 가격을 표시하려면 서버 명령에 `--workbook gangnam_menu_types.xlsx`를 추가한다. 원본 엑셀을 읽으려면 openpyxl이 필요하다. Windows에서는 python3 대신 py를 사용할 수 있다. GitHub에서 코드만 받은 경우 다음 명령으로 첨부 가격표에서 catalog.json을 먼저 생성한다.
 
 ```sh
 python3 -m pip install openpyxl

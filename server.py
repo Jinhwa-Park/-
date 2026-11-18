@@ -122,13 +122,14 @@ def main():
     parser.add_argument("--db", type=Path, default=Path("experiment.sqlite3"), help="실험 기록 SQLite 파일")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--open", action="store_true", help="로컬 브라우저에서 열기")
+    parser.add_argument("--workbook", type=Path, help="게시 가격을 표시할 원본 엑셀")
     args = parser.parse_args()
     catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     with closing(sqlite3.connect(args.db)) as db:
         db.executescript(DDL)
     with ThreadingHTTPServer(("127.0.0.1", args.port), Handler) as server:
         server.catalog, server.database = catalog, args.db
-        server.index = render(catalog).encode("utf-8")
+        server.index = render(catalog, args.workbook).encode("utf-8")
         print(f"레시피 가격 측정기  http://127.0.0.1:{server.server_port}", flush=True)
         if args.open:
             webbrowser.open(f"http://127.0.0.1:{server.server_port}")
