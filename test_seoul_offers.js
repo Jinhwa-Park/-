@@ -142,3 +142,28 @@ test("a recipe without default labor shows materials and only prices the order a
   assert.equal(ready.total, 3804);
   assert.equal(ready.offerTotal, 3804);
 });
+
+test("public recipes scale the original ingredient cost and require a selected, complete recipe", () => {
+  const recipes = {...recipeData, public: {entries: {
+    버섯국: [{id:"1", servings:2, ingredients:"버섯 100g"}, {id:"2", servings:null, ingredients:"버섯 80g"}],
+    비어있는국: [{id:"3", servings:null, ingredients:""}],
+    새우볶음밥: [{id:"4", servings:null, ingredients:"새우 50g"}],
+  }}};
+  const inputs = {batchCost:6000, work:{prepMinutes:6,batchMinutes:8,servingsPerBatch:2}, confirmed:true};
+  const pending = estimate(data,recipes,"버섯국",3,inputs);
+  assert.equal(pending.method,"public_recipe");
+  assert.equal(pending.offerTotal,null);
+  assert.equal(pending.publicRecipes.length,2);
+  const selected = estimate(data,recipes,"버섯국 (1인분)",3,{...inputs,publicRecipeId:"1"});
+  assert.deepEqual([selected.publicQuote.food,selected.publicQuote.work.labor,selected.publicQuote.markup,selected.offerTotal],
+    [9000,5867,2700,17567]);
+  assert.equal(offers(selected.offerTotal,()=>0.5).length,3);
+  assert.equal(estimate(data,recipes,"버섯국",3,{...inputs,publicRecipeId:"1",confirmed:false}).offerTotal,null);
+  assert.equal(estimate(data,recipes,"버섯국",3,{...inputs,publicRecipeId:"2"}).offerTotal,null);
+  assert.equal(estimate(data,recipes,"비어있는국",3,{...inputs,sourceServings:2}).offerTotal,null);
+  assert.equal(estimate(data,recipes,"버섯국 500g",3,inputs).publicRecipes.length,0);
+  const exact = estimate(data,recipes,"새우볶음밥",1);
+  assert.equal(exact.offerTotal,12000);
+  assert.equal(exact.publicRecipes.length,1);
+  assert.equal(exact.publicQuote,null);
+});

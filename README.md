@@ -24,6 +24,17 @@ python3 lookup.py --seoul-workbook ~/Downloads/seoul-menu-prices-cleaned.xlsx lo
 
 동일 메뉴 시세가 있으면 그 가격으로 오퍼를 생성하고 레시피 견적을 같은 주문 인분 기준으로 비교한다. 동일 메뉴 시세가 없으면 레시피 견적을 잠정가로 표시한다. 직접 작업시간과 주재료 매입 정보를 입력하고 레시피 재료와 분량을 확인하면 잠정가로 실험용 오퍼를 생성한다. 메뉴와 인분을 받는 조회 화면에는 추가 재료와 소분 조건이 포함되지 않는다.
 
+### 식약처 공개 레시피
+
+[식품의약품안전처 조리식품의 레시피 DB (COOKRCP01)](https://www.foodsafetykorea.go.kr/api/newDatasetDetail.do?svc_no=COOKRCP01)의 메뉴명, 조리 유형, 재료와 분량을 `cookrcp01.json`에 담았다. 동일 이름으로 여러 레시피가 있으면 일련번호로 구분한다. 원본 재료 항목의 첫머리에 인분이 명시된 경우 입력을 채워준다. 원본 인분을 확인한 뒤 원본 분량 전체의 재료비와 직접 작업시간을 입력하면 주문 인분에 맞춰 다시 계산한다. 재료·분량을 확인하고 가격을 낼 근거가 갖춰지면 실험용 오퍼를 만든다. 동일 메뉴 시세가 있으면 시세를 오퍼 기준으로 사용한다.
+
+새 CSV를 받으면 아래 명령으로 레시피 목록을 갱신한 뒤 서울 가격표 HTML을 다시 만든다.
+
+```sh
+python3 cookrcp_import.py ~/Downloads/COOKRCP01.csv cookrcp01.json
+python3 lookup.py --seoul-workbook ~/Downloads/seoul-menu-prices-cleaned.xlsx local/menu-price-offers.html
+```
+
 같은 화면은 `python3 server.py --seoul-workbook ~/Downloads/seoul-menu-prices-cleaned.xlsx`로도 열 수 있다. 브라우저 화면의 세 오퍼는 실험용이다. 서울 모드의 주문 API는 확인된 동일 메뉴 단가를 카탈로그로 사용한다. 작업시간 입력이 필요한 새 레시피는 기준가가 없을 때 재료비와 확인 사유를 반환한다.
 
 ## 현재 첫 화면 · 메뉴 가격 조회

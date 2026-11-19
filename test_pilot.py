@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from pricing import quote, quote_interpreted
 
 
@@ -77,3 +79,21 @@ class RecipeBrowserTests(unittest.TestCase):
                 self.assertTrue(all(line["source"].startswith("https://") for line in result["lines"]))
         self.assertEqual(data["menus"]["달걀국"], data["menus"]["계란국"])
         self.assertEqual(quote("달걀국", 1, catalog={})["status"], "review")
+
+    def test_public_csv_keeps_variants_and_only_prefills_explicit_batch_servings(self):
+        from cookrcp_import import import_recipes
+
+        csv = ('RCP_SEQ,RCP_NM,RCP_WAY2,RCP_PAT2,RCP_PARTS_DTLS,INFO_WGT,MANUAL01\n'
+               '1,버섯 볶음,볶기,반찬,"[ 2인분 ]<br>버섯 50g, 간장 5g",200,조리법\n'
+               '2,버섯볶음,굽기,반찬,버섯 70g. 소스는 5인분,200,조리법\n'
+               '3,배추국,끓이기,국&찌개,,220,조리법\n')
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "COOKRCP01.csv"
+            path.write_text(csv, encoding="utf-8-sig")
+            entries = import_recipes(path)["entries"]
+        variants = entries["버섯볶음"]
+        self.assertEqual([variant["id"] for variant in variants], ["1", "2"])
+        self.assertEqual([variant["servings"] for variant in variants], [2, None])
+        self.assertIn("\n버섯 50g, 간장 5g", variants[0]["ingredients"])
+        self.assertNotIn("MANUAL01", variants[0])
+        self.assertEqual(entries["배추국"][0]["ingredients"], "")

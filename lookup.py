@@ -50,6 +50,7 @@ def render(catalog, workbook=None, *, seoul=None):
 
         code = Path(__file__).with_name("seoul_offers.js").read_text(encoding="utf-8")
         recipes = browser_recipes()
+        recipes["public"] = json.loads(Path(__file__).with_name("cookrcp01.json").read_text(encoding="utf-8"))
     return (template.replace("/*SEOUL_OFFER_CODE*/", code, 1)
             .replace("/*RECIPE_PRICE_DATA*/null", script_json(recipes), 1)
             .replace("/*PRICE_TABLE*/{}", script_json(prices), 1)

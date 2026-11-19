@@ -107,15 +107,20 @@ const SeoulOffers = (() => {
   }
 
   const positive = value => Number.isFinite(value) && value > 0;
+  const positiveInteger = value => Number.isSafeInteger(value) && value > 0;
+
+  function measuredWork(policy, servings, {prepMinutes, batchMinutes, servingsPerBatch} = {}) {
+    if (!Number.isFinite(prepMinutes) || prepMinutes < 0 || !positive(batchMinutes) || !positiveInteger(servingsPerBatch)) {
+      return null;
+    }
+    const batches = Math.ceil(servings / servingsPerBatch);
+    const minutes = prepMinutes + batches * batchMinutes;
+    const labor = Math.round(minutes * policy.hourlyWon / 60);
+    return Number.isSafeInteger(labor) ? {prepMinutes, batchMinutes, servingsPerBatch, batches, minutes, labor} : null;
+  }
 
   function adjustRecipe(recipe, base, policy, servings, inputs) {
-    const {prepMinutes, batchMinutes, servingsPerBatch} = inputs.work ?? {};
-    const batches = Math.ceil(servings / servingsPerBatch);
-    const measuredMinutes = prepMinutes + batches * batchMinutes;
-    const measuredLabor = Math.round(measuredMinutes * policy.hourlyWon / 60);
-    const work = Number.isFinite(prepMinutes) && prepMinutes >= 0 && positive(batchMinutes) &&
-      Number.isSafeInteger(servingsPerBatch) && servingsPerBatch > 0 && Number.isSafeInteger(measuredLabor)
-      ? {prepMinutes, batchMinutes, servingsPerBatch, batches} : null;
+    const work = measuredWork(policy, servings, inputs.work);
     const primaryIngredients = new Set(recipe.primaryIngredients);
     const lines = base.lines.map(line => {
       const purchase = primaryIngredients.has(line.item) && inputs.purchases && own(inputs.purchases, line.item);
@@ -124,7 +129,7 @@ const SeoulOffers = (() => {
       return Number.isSafeInteger(cost) ? {...line, cost, purchase} : line;
     });
     const food = lines.reduce((sum, line) => sum + line.cost, 0);
-    const labor = work ? measuredLabor : base.labor;
+    const labor = work?.labor ?? base.labor;
     const markup_amount = food === base.food ? base.markup_amount : Math.round(food * policy.markup);
     const total = labor === null ? null : food + labor + markup_amount + base.packaging;
     const missingPurchases = recipe.primaryIngredients.filter(item => !lines.some(line => line.item === item && line.purchase));
@@ -134,30 +139,63 @@ const SeoulOffers = (() => {
       return {breakdown: base, missing: ["계산 범위 안의 작업시간과 매입 정보"]};
     }
     return {breakdown: {...base, lines, food, labor, markup_amount, total, work,
-      minutes: work ? measuredMinutes : base.minutes}, missing};
+      minutes: work?.minutes ?? base.minutes}, missing};
+  }
+
+  function quotePublicRecipe(records, policy, servings, inputs) {
+    const record = inputs.publicRecipeId ? records.find(record => record.id === inputs.publicRecipeId) :
+      records.length === 1 ? records[0] : null;
+    if (!record) return {total: null, missing: ["견적에 사용할 식약처 레시피 선택"]};
+    if (!record.ingredients) return {total: null, missing: ["원본에 빠진 재료와 분량 확인"]};
+
+    const sourceServings = inputs.sourceServings ?? record.servings;
+    const batchCost = inputs.batchCost;
+    const work = measuredWork(policy, servings, inputs.work);
+    const missing = [];
+    if (!positiveInteger(sourceServings)) missing.push("원본 분량의 인분");
+    if (!positiveInteger(batchCost)) missing.push("해당 분량의 재료비");
+    if (!work) missing.push("직접 작업시간");
+    if (inputs.confirmed !== true) missing.push("레시피 재료와 분량 확인");
+
+    const food = positiveInteger(sourceServings) && positiveInteger(batchCost) ? Math.round(batchCost * servings / sourceServings) : null;
+    const markup = food === null ? null : Math.round(food * policy.markup);
+    const total = food === null || !work ? null : food + markup + work.labor;
+    if ((food !== null && !positiveInteger(food)) || (total !== null && !positiveInteger(total))) {
+      return {total: null, missing: ["계산 범위 안의 재료비와 작업시간"]};
+    }
+    return {total, food, markup, work, missing};
   }
 
   function estimate(data, recipeData, query, servings, inputs = {}) {
     const market = find(data, query);
     const {name, unit} = parts(query);
     const menu = own(data.aliases, name) ?? name;
-    const recipeId = recipeData && (!unit || unit === "1인분") &&
+    const singleServing = !unit || unit === "1인분";
+    const recipeId = recipeData && singleServing &&
       (own(recipeData.menus, name) ?? own(recipeData.menus, menu));
     const recipe = recipeId ? own(recipeData.recipes, recipeId) : null;
     const base = recipe?.quotes[servings - 1];
     const recipeQuote = base ? {recipe, ...adjustRecipe(recipe, base, recipeData.policy, servings, inputs)} : null;
+    const publicIndex = recipeData?.public?.entries;
+    const publicRecipes = (publicIndex && singleServing && (own(publicIndex, name) ?? own(publicIndex, menu))) || [];
+    const publicQuote = !recipeQuote && publicRecipes.length ? quotePublicRecipe(publicRecipes, recipeData.policy, servings, inputs) : null;
     const marketTotal = market.basis ? market.basis.price * servings : null;
+    const context = {market, marketTotal, recipeQuote, publicRecipes, publicQuote};
     if (market.basis?.kind === "exact") {
-      return {market, marketTotal, recipeQuote, total: marketTotal, offerTotal: marketTotal, method: "market_exact"};
+      return {...context, total: marketTotal, offerTotal: marketTotal, method: "market_exact"};
     }
     if (recipeQuote) {
       const total = recipeQuote.breakdown.total;
-      return {market, marketTotal, recipeQuote, total, offerTotal: recipeQuote.missing.length ? null : total, method: "recipe"};
+      return {...context, total, offerTotal: recipeQuote.missing.length ? null : total, method: "recipe"};
+    }
+    if (publicQuote) {
+      const {total, missing} = publicQuote;
+      return {...context, total, offerTotal: missing.length ? null : total, method: "public_recipe"};
     }
     if (marketTotal) {
-      return {market, marketTotal, recipeQuote, total: marketTotal, offerTotal: null, method: "market_estimate"};
+      return {...context, total: marketTotal, offerTotal: null, method: "market_estimate"};
     }
-    return {market, marketTotal, recipeQuote, total: null, offerTotal: null, method: "review"};
+    return {...context, total: null, offerTotal: null, method: "review"};
   }
 
   return {find, offers, estimate};
