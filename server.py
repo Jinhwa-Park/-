@@ -118,18 +118,29 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--catalog", type=Path, required=True, help="가격 기준표 JSON 경로")
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--catalog", type=Path, help="가격 기준표 JSON 경로")
+    source.add_argument("--seoul-workbook", type=Path, help="정제된 서울 메뉴 가격표")
     parser.add_argument("--db", type=Path, default=Path("experiment.sqlite3"), help="실험 기록 SQLite 파일")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--open", action="store_true", help="로컬 브라우저에서 열기")
     parser.add_argument("--workbook", type=Path, help="게시 가격을 표시할 원본 엑셀")
     args = parser.parse_args()
-    catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
+    seoul = None
+    if args.seoul_workbook:
+        if args.workbook:
+            parser.error("서울 가격표 모드에서는 --seoul-workbook만 지정해 주세요.")
+        from seoul_catalog import load_seoul, quote_catalog
+
+        seoul = load_seoul(args.seoul_workbook)
+        catalog = quote_catalog(seoul)
+    else:
+        catalog = json.loads(args.catalog.read_text(encoding="utf-8"))
     with closing(sqlite3.connect(args.db)) as db:
         db.executescript(DDL)
     with ThreadingHTTPServer(("127.0.0.1", args.port), Handler) as server:
         server.catalog, server.database = catalog, args.db
-        server.index = render(catalog, args.workbook).encode("utf-8")
+        server.index = render({} if seoul else catalog, args.workbook, seoul=seoul).encode("utf-8")
         print(f"레시피 가격 측정기  http://127.0.0.1:{server.server_port}", flush=True)
         if args.open:
             webbrowser.open(f"http://127.0.0.1:{server.server_port}")

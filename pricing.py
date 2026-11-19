@@ -2,7 +2,7 @@
 import math
 import unicodedata
 
-from fried_rice import quote_fried_rice, shrimp_extra_cost, meat_extra_cost
+from fried_rice import quote_recipe, shrimp_extra_cost, meat_extra_cost
 
 
 def key(name):
@@ -35,8 +35,8 @@ def quote(menu, servings, *, catalog, extra=None, extra_grams=0, per_serving=Fal
         return review(menu, "주재료를 알려주세요.", "clarification")
     record = catalog.get(name)
     if record is None:
-        result = quote_fried_rice(menu, servings, extra=extra, extra_grams=extra_grams,
-                                  per_serving=per_serving, containers=containers)
+        result = quote_recipe(menu, servings, extra=extra, extra_grams=extra_grams,
+                              per_serving=per_serving, containers=containers)
     else:
         amount = extra_grams * (servings if per_serving else 1)
         adjustment = {"total": 0}

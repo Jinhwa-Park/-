@@ -1,0 +1,94 @@
+{
+  "accessed_on": "2026-11-19",
+  "price_basis": "온라인 소매 상품의 포장 단위와 표시가를 사용한다. 배송비는 제외한다. 일부 재료는 기존 단가표의 상품을 함께 사용한다.",
+  "offers": {
+    "포기김치": {"product": "종가 포기김치", "unit": "g", "size": 900, "won": 15900, "url": "https://lottemartzetta.com/products/OS8801024957118/details"},
+    "스팸": {"product": "CJ 스팸 클래식", "unit": "g", "size": 600, "won": 9980, "url": "https://lottemartzetta.com/products/OS8801007519456/details"},
+    "참치캔": {"product": "동원 살코기참치 135g 4입", "unit": "g", "size": 540, "won": 12680, "url": "https://lottemartzetta.com/products/OS8801047836018/details"},
+    "홍게살": {"product": "컬리 국산 붉은대게살", "unit": "g", "size": 100, "won": 8900, "url": "https://www.kurly.com/goods/5005084"},
+    "양파": {"product": "소용량 양파 2입", "unit": "g", "size": 400, "won": 1590, "url": "https://lottemartzetta.com/products/OS8809597441263/details"},
+    "당근": {"product": "롯데마트 당근", "unit": "g", "size": 200, "won": 1300, "url": "https://lottemartzetta.com/products/OS2873260000008/details"},
+    "설탕": {"product": "백설 하얀설탕", "unit": "g", "size": 1000, "won": 2280, "url": "https://lottemartzetta.com/products/OS8801007100838/details"},
+    "참기름": {"product": "백설 고소함가득참기름", "unit": "mL", "size": 500, "won": 14980, "url": "https://emart.ssg.com/item/itemView.ssg?itemId=0000006618834"},
+    "다진 마늘": {"product": "CJ 다진 마늘", "unit": "g", "size": 250, "won": 8690, "url": "https://lottemartzetta.com/products/OS8801007030883/details"},
+    "맛술": {"product": "롯데 미림", "unit": "mL", "size": 500, "won": 2370, "url": "https://lottemartzetta.com/products/OS8801056023690/details"},
+    "맛간장": {"product": "해찬들 맛간장", "unit": "mL", "size": 450, "won": 8980, "url": "https://lottemartzetta.com/products/OS8801392174315/details"},
+    "멸치액젓": {"product": "하선정 멸치 액젓", "unit": "mL", "size": 666, "won": 6580, "url": "https://emart.ssg.com/item/itemView.ssg?itemId=0000007074037&salestrNo=2551&siteNo=7009"},
+    "국간장": {"product": "샘표 국간장", "unit": "mL", "size": 500, "won": 4430, "url": "https://lottemartzetta.com/products/OS8801005110907/details"},
+    "새우젓": {"product": "한성 토굴숙성 광천 새우젓", "unit": "g", "size": 250, "won": 9980, "url": "https://emart.ssg.com/item/itemView.ssg?itemId=0000007354825&salestrNo=2037&siteNo=6001"},
+    "된장": {"product": "해찬들 맛있는 재래식 된장", "unit": "g", "size": 500, "won": 5390, "url": "https://lottemartzetta.com/products/OS8801007053349/details"},
+    "두부": {"product": "풀무원 국산 부침두부", "unit": "g", "size": 340, "won": 4990, "url": "https://lottemartzetta.com/products/OS8801114119426/details"},
+    "애호박": {"product": "GAP 애호박", "unit": "g", "size": 250, "won": 2490, "url": "https://lottemartzetta.com/products/OS0430001342920/details"},
+    "감자": {"product": "국산 감자 1kg", "unit": "g", "size": 1000, "won": 3990, "url": "https://lottemartzetta.com/products/OS8809597449337/details"},
+    "육수용 멸치": {"product": "국물용 멸치", "unit": "g", "size": 700, "won": 10900, "url": "https://lottemartzetta.com/products/OS8809691865699/details"},
+    "청양고추": {"product": "소용량 청양고추", "unit": "g", "size": 60, "won": 1490, "url": "https://lottemartzetta.com/products/OS0400404440004/details"},
+    "홍고추": {"product": "소용량 홍고추", "unit": "g", "size": 80, "won": 1990, "url": "https://lottemartzetta.com/products/OS0430001200091/details"},
+    "쇠고기 양지": {"product": "대구축협 팔공참한우 1등급 양지", "unit": "g", "size": 300, "won": 20900, "url": "https://emart.ssg.com/item/itemView.ssg?itemId=1000040684006&salestrNo=6005&siteNo=6001"},
+    "건미역": {"product": "오뚜기 옛날 자른 미역", "unit": "g", "size": 50, "won": 3490, "url": "https://lottemartzetta.com/products/OS8801045352107/details"}
+  },
+  "recipes": {
+    "kimchi_fried_rice": {
+      "name": "오먹지 김치볶음밥",
+      "menus": ["김치볶음밥"],
+      "primary_ingredients": ["포기김치"],
+      "url": "https://omeokji.com/recipes/kimchi-fried-rice-recipe",
+      "per_serving": {"쌀": 84, "포기김치": 150, "대파": 30, "달걀": 1},
+      "seasonings": {"식용유": 15, "간장": 5, "설탕": 4, "참기름": 5},
+      "assumptions": "밥 210g은 마른쌀 84g으로 환산한다. 신김치 단가에 포기김치 소매가를 대입하고 설탕 1작은술을 4g으로 잡는다."
+    },
+    "spam_kimchi_fried_rice": {
+      "name": "RECIPE JD 스팸김치볶음밥",
+      "menus": ["스팸김치볶음밥"],
+      "primary_ingredients": ["스팸", "포기김치"],
+      "url": "https://recipe.helperjd.com/ko/recipe/spam-kimchi-fried-rice",
+      "per_serving": {"쌀": 84, "스팸": 70, "포기김치": 100, "대파": 15},
+      "seasonings": {"식용유": 5, "간장": 2.5, "참기름": 2.5},
+      "assumptions": "밥 1공기를 210g, 마른쌀 84g으로 환산한다. 깐대파 1대는 60g으로 잡는다."
+    },
+    "tuna_fried_rice": {
+      "name": "차림 참치볶음밥",
+      "menus": ["참치볶음밥"],
+      "primary_ingredients": ["참치캔"],
+      "url": "https://charim.soundedfun.dev/ko/recipe/chamchi-bokkeumbap",
+      "per_serving": {"쌀": 63.2, "참치캔": 67.5, "양파": 40, "당근": 20, "대파": 10, "달걀": 1},
+      "seasonings": {"간장": 11.25, "참기름": 2.5},
+      "assumptions": "2인분 원문을 기준으로 밥 1컵을 158g, 마른쌀 63.2g으로 환산한다. 참치 1캔은 135g 규격을 쓰며 원문에 따라 기름까지 사용한다."
+    },
+    "crab_fried_rice": {
+      "name": "컬리 레시피 게살볶음밥",
+      "menus": ["게살볶음밥"],
+      "primary_ingredients": ["홍게살"],
+      "url": "https://lounge.kurly.com/recipe/67aad1ff5c6b97510b96f88e",
+      "per_serving": {"쌀": 63, "홍게살": 75, "대파": 30, "달걀": 1},
+      "seasonings": {"식용유": 10, "다진 마늘": 2.5, "맛술": 2.5, "소금": 0.15, "맛간장": 7.5, "멸치액젓": 7.5},
+      "assumptions": "2인분 원문을 환산했다. 밥 한 공기는 210g, 깐대파 한 대는 60g으로 잡았다. 식용유와 소금 약간은 각각 1인분 10mL와 0.15g을 적용했다. 참치액 대신 액젓을 사용하는 구성에 멸치액젓을 적용했다."
+    },
+    "doenjang_stew": {
+      "name": "우리의식탁 된장찌개",
+      "menus": ["된장찌개"],
+      "primary_ingredients": ["두부", "육수용 멸치"],
+      "url": "https://wtable.co.kr/recipes/G96HSCsrmWzAmbynq9EdZAH3",
+      "per_serving": {"두부": 85, "애호박": 62.5, "양파": 25, "감자": 37.5, "대파": 7.5, "육수용 멸치": 6, "청양고추": 5, "홍고추": 2.5},
+      "seasonings": {"된장": 15, "다진 마늘": 1.25},
+      "assumptions": "2인분 원문을 환산했다. 두부 1모 340g, 애호박 1개 250g, 양파 1개 200g, 감자 1개 150g, 대파 1대 60g, 건멸치 1마리 3g, 고추 1개 10g을 적용했다. 육수용 멸치는 재료비에 포함하고 물·쌀뜨물의 비용은 제외했다."
+    },
+    "egg_soup": {
+      "name": "우리의식탁 달걀국",
+      "menus": ["달걀국", "계란국"],
+      "primary_ingredients": ["달걀"],
+      "url": "https://wtable.co.kr/recipes/YT8BxR6iVFDTXdbqSby77NLA",
+      "per_serving": {"달걀": 1.5, "대파": 10},
+      "seasonings": {"새우젓": 2.5, "국간장": 1.25, "맛술": 7.5, "소금": 0.3, "후추": 0.05},
+      "assumptions": "2인분 원문을 환산했다. 깐대파 1대 60g, 새우젓 1작은술 5g을 적용했다. 1인분 소금 0.3g과 후추 0.05g은 가정값이다. 물 비용은 제외했다."
+    },
+    "beef_seaweed_soup": {
+      "name": "우리의식탁 쇠고기 미역국",
+      "menus": ["쇠고기미역국", "소고기미역국"],
+      "primary_ingredients": ["쇠고기 양지", "건미역"],
+      "url": "https://wtable.co.kr/recipes/Yg6T2drYTBBbrbMRGccZ2XX6",
+      "per_serving": {"쇠고기 양지": 25, "건미역": 5},
+      "seasonings": {"참기름": 7.5, "국간장": 7.5, "다진 마늘": 3.75, "멸치액젓": 3.75},
+      "assumptions": "4인분 원문에서 양지, 참기름, 멸치액젓을 선택했다. 미역은 불리기 전 건조 중량이며 다진 마늘 1큰술은 15g을 적용했다. 물·쌀뜨물 비용은 제외했다."
+    }
+  }
+}

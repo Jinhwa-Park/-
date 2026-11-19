@@ -29,7 +29,11 @@ def observations(workbook):
         book.close()
 
 
-def render(catalog, workbook=None):
+def script_json(value):
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":")).replace("<", r"\u003c")
+
+
+def render(catalog, workbook=None, *, seoul=None):
     prices = {
         menu: {"price": row["unit_price"], "basis": row.get("basis", "인분 근거 미표기")}
         for menu, row in catalog.items()
@@ -40,14 +44,33 @@ def render(catalog, workbook=None):
     for name, rows in records.items():
         prices.setdefault(name, {})["observations"] = sorted(rows)
     template = Path(__file__).with_name("index.html").read_text(encoding="utf-8")
-    data = json.dumps(prices, ensure_ascii=False).replace("<", r"\u003c")
-    return template.replace("/*PRICE_TABLE*/{}", data)
+    code, recipes = "", None
+    if seoul:
+        from fried_rice import browser_recipes
+
+        code = Path(__file__).with_name("seoul_offers.js").read_text(encoding="utf-8")
+        recipes = browser_recipes()
+    return (template.replace("/*SEOUL_OFFER_CODE*/", code, 1)
+            .replace("/*RECIPE_PRICE_DATA*/null", script_json(recipes), 1)
+            .replace("/*PRICE_TABLE*/{}", script_json(prices), 1)
+            .replace("/*SEOUL_PRICE_DATA*/null", script_json(seoul), 1))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="브라우저에서 바로 열 수 있는 메뉴 가격 조회 파일 생성")
-    parser.add_argument("catalog", type=Path)
+    parser.add_argument("catalog", type=Path, nargs="?")
     parser.add_argument("output", type=Path)
     parser.add_argument("--workbook", type=Path, help="판매 단위와 게시 가격이 들어 있는 원본 엑셀")
+    parser.add_argument("--seoul-workbook", type=Path, help="정제된 서울 메뉴 가격표")
     args = parser.parse_args()
-    args.output.write_text(render(json.loads(args.catalog.read_text(encoding="utf-8")), args.workbook), encoding="utf-8")
+    if args.seoul_workbook:
+        if args.catalog or args.workbook:
+            parser.error("서울 가격표 모드에서는 --seoul-workbook만 지정해 주세요.")
+        from seoul_catalog import load_seoul
+
+        rendered = render({}, seoul=load_seoul(args.seoul_workbook))
+    else:
+        if not args.catalog:
+            parser.error("카탈로그 JSON 또는 --seoul-workbook을 지정해 주세요.")
+        rendered = render(json.loads(args.catalog.read_text(encoding="utf-8")), args.workbook)
+    args.output.write_text(rendered, encoding="utf-8")

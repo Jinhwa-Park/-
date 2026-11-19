@@ -44,3 +44,36 @@ class CatalogTests(unittest.TestCase):
                 alternative = row.copy()
                 alternative[column] = value
                 self.assertIsNone(observation(alternative, {"새우볶음밥"}))
+
+
+class RecipeBrowserTests(unittest.TestCase):
+    def test_browser_price_uses_existing_recipe_and_batch_calculation(self):
+        from fried_rice import browser_recipes, quote_fried_rice
+
+        data = browser_recipes()
+        for menu in ("새우볶음밥", "새우계란볶음밥"):
+            recipe = data["recipes"][data["menus"][menu]]
+            for servings in (1, 3, 100):
+                with self.subTest(menu=menu, servings=servings):
+                    expected = quote_fried_rice(menu, servings)
+                    result = recipe["quotes"][servings - 1]
+                    self.assertEqual(result["total"], expected["total"])
+                    self.assertEqual(result["lines"], expected["lines"])
+                    self.assertEqual(result["minutes"], expected["minutes"])
+
+    def test_new_recipes_have_priced_items_and_wait_for_work_time(self):
+        from fried_rice import browser_recipes
+
+        data = browser_recipes()
+        menus = ("김치볶음밥", "스팸김치볶음밥", "참치볶음밥", "게살볶음밥", "된장찌개", "달걀국", "쇠고기미역국")
+        for menu in menus:
+            with self.subTest(menu=menu):
+                recipe = data["recipes"][data["menus"][menu]]
+                result = recipe["quotes"][0]
+                self.assertIsNone(result["total"])
+                self.assertIsNone(result["labor"])
+                self.assertEqual(result["food"], sum(line["cost"] for line in result["lines"]))
+                self.assertTrue(set(recipe["primaryIngredients"]) <= {line["item"] for line in result["lines"]})
+                self.assertTrue(all(line["source"].startswith("https://") for line in result["lines"]))
+        self.assertEqual(data["menus"]["달걀국"], data["menus"]["계란국"])
+        self.assertEqual(quote("달걀국", 1, catalog={})["status"], "review")

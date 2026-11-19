@@ -14,6 +14,8 @@
   },
   "registered_recipe": {
     "name": "우리의식탁·LG 중식 새우볶음밥",
+    "menus": ["새우볶음밥", "중식새우볶음밥"],
+    "primary_ingredients": ["새우"],
     "url": "https://wtable.co.kr/recipes/JDixtYd7SyHPvVSzmRgnD6Gd",
     "per_serving": {"쌀": 80, "달걀": 2, "대파": 30, "새우": 80},
     "seasonings": {"식용유": 30, "소금": 0.6, "후추": 0.1},
@@ -21,6 +23,8 @@
   },
   "inference": {
     "name": "계란볶음밥에 새우를 추가",
+    "menus": ["새우계란볶음밥", "새우달걀볶음밥"],
+    "primary_ingredients": ["새우"],
     "base_url": "https://omeokji.com/recipes/easy-egg-fried-rice",
     "portion_url": "https://www.10000recipe.com/recipe/7013556",
     "per_serving": {"쌀": 84, "달걀": 2, "대파": 30, "새우": 100},
