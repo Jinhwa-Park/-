@@ -109,14 +109,19 @@ const SeoulOffers = (() => {
   const positive = value => Number.isFinite(value) && value > 0;
   const positiveInteger = value => Number.isSafeInteger(value) && value > 0;
 
+  function workCost(policy, minutes) {
+    if (!positive(minutes)) return null;
+    const labor = Math.round(minutes * policy.hourlyWon / 60);
+    return Number.isSafeInteger(labor) ? {minutes, labor} : null;
+  }
+
   function measuredWork(policy, servings, {prepMinutes, batchMinutes, servingsPerBatch} = {}) {
     if (!Number.isFinite(prepMinutes) || prepMinutes < 0 || !positive(batchMinutes) || !positiveInteger(servingsPerBatch)) {
       return null;
     }
     const batches = Math.ceil(servings / servingsPerBatch);
-    const minutes = prepMinutes + batches * batchMinutes;
-    const labor = Math.round(minutes * policy.hourlyWon / 60);
-    return Number.isSafeInteger(labor) ? {prepMinutes, batchMinutes, servingsPerBatch, batches, minutes, labor} : null;
+    const totals = workCost(policy, prepMinutes + batches * batchMinutes);
+    return totals && {prepMinutes, batchMinutes, servingsPerBatch, batches, ...totals};
   }
 
   function adjustRecipe(recipe, base, policy, servings, inputs) {
@@ -150,7 +155,7 @@ const SeoulOffers = (() => {
 
     const sourceServings = inputs.sourceServings ?? record.servings;
     const batchCost = inputs.batchCost;
-    const work = measuredWork(policy, servings, inputs.work);
+    const work = inputs.directMinutes === undefined ? measuredWork(policy, servings, inputs.work) : workCost(policy, inputs.directMinutes);
     const missing = [];
     if (!positiveInteger(sourceServings)) missing.push("원본 분량의 인분");
     if (!positiveInteger(batchCost)) missing.push("해당 분량의 재료비");

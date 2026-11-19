@@ -26,7 +26,7 @@ python3 lookup.py --seoul-workbook ~/Downloads/seoul-menu-prices-cleaned.xlsx lo
 
 ### 식약처 공개 레시피
 
-[식품의약품안전처 조리식품의 레시피 DB (COOKRCP01)](https://www.foodsafetykorea.go.kr/api/newDatasetDetail.do?svc_no=COOKRCP01)의 메뉴명, 조리 유형, 재료와 분량을 `cookrcp01.json`에 담았다. 동일 이름으로 여러 레시피가 있으면 일련번호로 구분한다. 원본 재료 항목의 첫머리에 인분이 명시된 경우 입력을 채워준다. 원본 인분을 확인한 뒤 원본 분량 전체의 재료비와 직접 작업시간을 입력하면 주문 인분에 맞춰 다시 계산한다. 재료·분량을 확인하고 가격을 낼 근거가 갖춰지면 실험용 오퍼를 만든다. 동일 메뉴 시세가 있으면 시세를 오퍼 기준으로 사용한다.
+[식품의약품안전처 조리식품의 레시피 DB (COOKRCP01)](https://www.foodsafetykorea.go.kr/api/newDatasetDetail.do?svc_no=COOKRCP01)의 메뉴명, 조리 유형, 재료와 분량을 `cookrcp01.json`에 담았다. 동일 이름으로 여러 레시피가 있으면 일련번호로 구분한다. 원본 재료 항목의 첫머리에 인분이 명시된 경우 입력을 채워준다. 조회 결과에서 원본 분량의 인분과 전체 재료비, 주문 전체의 직접 작업시간을 입력한 뒤 **오퍼 가격 계산**을 누른다. 동일 메뉴 시세가 있으면 시세를 기준으로 오퍼를 표시하고, 공개 레시피는 별도 견적을 계산할 수 있다.
 
 새 CSV를 받으면 아래 명령으로 레시피 목록을 갱신한 뒤 서울 가격표 HTML을 다시 만든다.
 

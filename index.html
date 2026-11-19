@@ -22,6 +22,8 @@
   .recipe-fields label,.recipe-confirm{font-size:.9rem;font-weight:normal}.recipe-fields input{background:white;margin:.2rem 0 .6rem}
   .recipe-confirm{display:flex;align-items:baseline;gap:.5rem}.recipe-confirm input{width:auto;margin:0;accent-color:#32573c}
   .public-ingredients{white-space:pre-wrap;overflow-wrap:anywhere}
+  .public-quote-form fieldset{margin:0}.public-quote-form button{margin:0 0 .5rem}
+  .public-quote-form .recipe-fields label{font-size:.88rem}.public-quote-form .recipe-fields input{padding:.5rem .7rem}
   .recipe-summary select{display:block;width:100%;font:inherit;padding:.5rem;margin:.25rem 0 .65rem;border:1px solid #9b9e91;border-radius:8px;background:white}
   .offer-hold{color:#714a21;font-size:.95rem}
 </style>
@@ -235,7 +237,7 @@ function renderRecipeInputs(recipe, update) {
   return panel;
 }
 
-function renderPublicRecipes(records, update) {
+function renderPublicRecipes(records, count, needsOffer, update) {
   const section = line("section", "", "recipe-summary");
   const content = document.createElement("div");
   function selectRecipe(record) {
@@ -246,32 +248,40 @@ function renderPublicRecipes(records, update) {
     }
     content.append(line("p", [record.category, record.method, record.servings ? `원본 ${record.servings}인분` : "원본 인분 확인 필요",
       `일련번호 ${record.id}`].filter(Boolean).join(" · "), "details"));
-    content.append(line("p", record.ingredients || "원본에 재료 정보가 없어요.", "public-ingredients"));
+    const ingredients = line("p", record.ingredients || "원본에 재료 정보가 없어요.", "public-ingredients");
     if (!update || !record.ingredients) {
+      content.append(ingredients);
       update?.({publicRecipeId: record.id});
       return;
     }
     const displayed = line("p", "", "details");
     displayed.setAttribute("aria-live", "polite");
-    const panel = line("details", "", "recipe-inputs");
-    panel.append(line("summary", "식약처 레시피의 재료비·작업시간 입력"));
-    const costs = inputGroup(panel, "원본 레시피 분량과 재료비");
+    const panel = line("form", "", "public-quote-form");
+    panel.append(line("p", `작업시간은 이번 ${count}인분 주문을 만드는 데 손이 필요한 전체 시간으로 입력해 주세요.`, "details"));
+    const costs = inputGroup(panel, "견적 입력");
     const portions = numberField(costs, "원본 분량의 인분", "1", "1", record.servings ?? "");
     const price = numberField(costs, "해당 분량의 전체 재료비(원)", "1", "1");
-    const work = workFields(panel);
-    const confirmed = recipeConfirmation(panel);
-    const refresh = () => {
+    const minutes = numberField(costs, "주문 전체 직접 작업시간(분)", "0.1");
+    for (const input of costs.querySelectorAll("input")) input.required = true;
+    const calculate = line("button", needsOffer ? "오퍼 가격 계산" : "레시피 견적 계산");
+    calculate.type = "submit";
+    panel.append(calculate, displayed);
+    const refresh = confirmed => {
       const quote = update({publicRecipeId: record.id, sourceServings: portions(), batchCost: price(),
-        work: work(), confirmed: confirmed()});
+        directMinutes: minutes(), confirmed});
       displayed.textContent = [
         quote?.food != null ? `주문 재료비 ${money(quote.food)} · 가산액 ${money(quote.markup)}` : "",
         quote?.work ? `직접 작업시간 ${quote.work.minutes.toLocaleString("ko-KR", {maximumFractionDigits: 2})}분 · 인건비 ${money(quote.work.labor)}` : "",
         quote?.total != null ? `레시피 잠정가 ${money(quote.total)}` : "",
       ].filter(Boolean).join(" · ");
     };
-    panel.addEventListener("input", refresh);
-    content.append(displayed, panel);
-    refresh();
+    panel.addEventListener("input", () => refresh(false));
+    panel.addEventListener("submit", event => {
+      event.preventDefault();
+      refresh(true);
+    });
+    content.append(panel, ingredients);
+    refresh(false);
   }
   if (records.length > 1) {
     const label = line("label", "원본 레시피 선택");
@@ -314,7 +324,9 @@ function renderQuote(summary, estimate, count) {
     summary.append(line("p", `유사 메뉴 시세 참고가 ${money(marketTotal)}`, "details"));
   }
   if (offerTotal === null) {
-    const reason = recipe ? `${(recipeQuote ?? publicQuote).missing.join(", ")} 필요` :
+    const awaitingPublicSubmit = method === "public_recipe" && total !== null;
+    const reason = awaitingPublicSubmit ? "아래에서 ‘오퍼 가격 계산’을 눌러 주세요." :
+      recipe ? `${(recipeQuote ?? publicQuote).missing.join(", ")} 필요` :
       method === "market_estimate" ? "동일 메뉴 시세 또는 확인된 레시피 입력값 필요" : "비교할 시세와 레시피 근거 부족";
     summary.append(line("p", `오퍼 보류 · ${reason}`, "offer-hold"));
     return;
@@ -338,6 +350,7 @@ function renderSeoul(query, count) {
   const {exact, references, similar, basis} = estimate.market;
   const summary = line("section", "", "quote-summary");
   summary.setAttribute("aria-live", "polite");
+  summary.tabIndex = -1;
   renderQuote(summary, estimate, count);
   result.replaceChildren(summary);
   if (estimate.recipeQuote) {
@@ -355,15 +368,19 @@ function renderSeoul(query, count) {
       if (adjusted.method === "recipe") renderQuote(summary, adjusted, count);
       showBreakdown(adjusted);
     });
+    inputs.open = estimate.offerTotal === null;
     result.append(line("h2", "레시피 견적 내역"), breakdown, inputs);
   }
   if (estimate.publicRecipes.length) {
     const update = estimate.recipeQuote ? null : values => {
       const adjusted = SeoulOffers.estimate(seoulData, recipeData, query, count, values);
-      if (adjusted.method === "public_recipe") renderQuote(summary, adjusted, count);
+      if (adjusted.method === "public_recipe") {
+        renderQuote(summary, adjusted, count);
+        if (values.confirmed && adjusted.offerTotal !== null) summary.focus();
+      }
       return adjusted.publicQuote;
     };
-    result.append(line("h2", "식약처 공개 레시피"), renderPublicRecipes(estimate.publicRecipes, update));
+    result.append(line("h2", "식약처 공개 레시피"), renderPublicRecipes(estimate.publicRecipes, count, estimate.method === "public_recipe", update));
   }
   if (references.length) {
     result.append(line("h2", "동일 메뉴 참고가"));

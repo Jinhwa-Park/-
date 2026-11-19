@@ -159,6 +159,9 @@ test("public recipes scale the original ingredient cost and require a selected, 
     [9000,5867,2700,17567]);
   assert.equal(offers(selected.offerTotal,()=>0.5).length,3);
   assert.equal(estimate(data,recipes,"버섯국",3,{...inputs,publicRecipeId:"1",confirmed:false}).offerTotal,null);
+  const direct = estimate(data,recipes,"버섯국",3,{...inputs,publicRecipeId:"1",directMinutes:15});
+  assert.deepEqual([direct.publicQuote.food,direct.publicQuote.work.labor,direct.offerTotal],[9000,4000,15700]);
+  assert.equal(estimate(data,recipes,"버섯국",3,{...inputs,publicRecipeId:"1",directMinutes:0}).offerTotal,null);
   assert.equal(estimate(data,recipes,"버섯국",3,{...inputs,publicRecipeId:"2"}).offerTotal,null);
   assert.equal(estimate(data,recipes,"비어있는국",3,{...inputs,sourceServings:2}).offerTotal,null);
   assert.equal(estimate(data,recipes,"버섯국 500g",3,inputs).publicRecipes.length,0);
